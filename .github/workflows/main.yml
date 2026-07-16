@@ -1,0 +1,28 @@
+name: 基金盘中估值推送
+
+on:
+  schedule:
+    # UTC 每小时 :30，1:30–7:30，周一至周五 = 北京时间 9:30–15:30，覆盖 A 股早/午两市
+    - cron: '30 1-7 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 获取代码
+        uses: actions/checkout@v3
+
+      - name: 安装 Python 环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: 安装依赖包
+        run: pip install requests pillow
+
+      - name: 运行！生成图片并推送
+        env:
+          ZECTRIX_API_KEY: ${{ secrets.ZECTRIX_API_KEY }}
+          ZECTRIX_MAC: ${{ secrets.ZECTRIX_MAC }}
+        run: python main.py
