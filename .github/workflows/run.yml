@@ -1,20 +1,17 @@
-name: 墨水屏综合看板推送
+name: 基金盘中估值推送
 
 on:
   schedule:
-    - cron: '0 * * * *'  # 每小时运行一次
+    # UTC 每小时 :30，1:30–7:30，周一至周五 = 北京时间 9:30–15:30，覆盖 A 股早/午两市
+    - cron: '30 1-7 * * 1-5'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write  # 添加这一行，允许推送代码
     steps:
       - name: 获取代码
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # 获取完整历史，以便后续提交
 
       - name: 安装 Python 环境
         uses: actions/setup-python@v4
@@ -22,14 +19,10 @@ jobs:
           python-version: '3.10'
 
       - name: 安装依赖包
-        run: pip install requests pillow zhdate
+        run: pip install requests pillow
 
       - name: 运行！生成图片并推送
         env:
           ZECTRIX_API_KEY: ${{ secrets.ZECTRIX_API_KEY }}
           ZECTRIX_MAC: ${{ secrets.ZECTRIX_MAC }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          AMAP_WEATHER_KEY: ${{ secrets.AMAP_WEATHER_KEY }}   # 新增这一行
         run: python main.py
-
-    
